@@ -1,8 +1,11 @@
-function fermi(E,mu,kT) !Fermi Function
+subroutine fermi(E,mu,kT,f,n) !Fermi Function
   implicit none
-  real(8) :: fermi
-  real(8) :: E  !Energy, main variable
+  integer(2) :: i, n
+  real(8) :: E(n)  !Energy, main variable
   real(8) :: mu !Chemical potential
   real(8) :: kT ! product of Boltzman constant and absolute temp
-  fermi = 1.0d0/(1.0d0+exp((E-mu)/kT))  
-end function fermi
+  real(8) :: f(n)
+  do i= 1, n
+    f(i) = 1.0d0/(1.0d0+exp((E(i)-mu)/kT))  
+  end do
+end subroutine fermi
