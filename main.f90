@@ -1,6 +1,5 @@
 program main
   implicit none
-  real(8) :: a, b
   integer(2) :: n, i, j, IV
   real(8) :: D0
   real(8), allocatable :: E(:), D(:), VV(:), II(:), NN(:), f0(:),f1(:), f2(:)
@@ -21,6 +20,7 @@ program main
   Cg = epsr*eps0*W*L/t
   Cs = 0.05d0*Cg
   Cd = 0.05d0*Cg
+  CE = Cg+Cs+Cd
   U0 = q/CE
   alphag = Cg/CE
   alphad = Cd/CE
@@ -33,14 +33,12 @@ program main
   g = g1+g2
   
 ! Energy grid
-  a = -1.0d0
-  b = 1.0d0
   n = 501
   I0 = q*q/hbar
-  dE = E(2)-E(1)
   open(1, file='IV.dat',action='write')
-  allocate(E(n),D(n),VV(n),II(n), NN(n),f0(n),f1(n),f2(n))
-  call linspace(a,b,n,E)
+  allocate(E(n),D(n), II(n), NN(n),f0(n),f1(n),f2(n))
+  call linspace(-1.0d0,1.0d0,n,E)
+  dE = E(2)-E(1) 
   D0 = m*q*W*L/(pi*hbar*hbar) ! step density of states per eV
   D = 0.0d0
   do i = (n+1)/2+1, n
@@ -56,8 +54,10 @@ program main
   allocate(VV(IV))
   call linspace(0.0d0, 0.6d0, IV, VV)
   do i = 1, IV
-    Vg = 0.5d0
-    Vd = VV(i)
+   ! Vg = 0.5d0
+   ! Vd = VV(i) 
+   Vd = 0.5
+   Vg = VV(i)
     mu1 = mu
     mu2 = mu1-Vd
     UL = -(alphag*Vg)-(alphad*Vd)
@@ -67,12 +67,12 @@ program main
    do while(dU .gt. 1.0d-06)
      call fermi(E+UL+U+ep, mu1, kT, f1, n)
      call fermi(E+UL+U+ep, mu2, kT, f2, n)
-     NN(i) = dE*mysum(D*f1*g1/g+f2*g2/g,n)
+     NN(i) = dE*mysum(D*(f1*g1/g+f2*g2/g),n)
      Unew = U0*(NN(i)-N0)
      dU = abs(U-Unew)
      U = U+0.10d0*(Unew-U)
    end do
-   II(i) = dE*I0*mysum(D*(f1-f2))*g1*g2/g
+   II(i) = dE*I0*mysum(D*(f1-f2),n)*g1*g2/g
   write(1,*) VV(i),II(i)
 end do
   close(1)
